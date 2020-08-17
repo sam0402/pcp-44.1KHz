@@ -1,0 +1,150 @@
+--- linux/arch/arm/kernel/setup.c	2020-08-06 15:37:52.916179919 +0100
++++ linux-4.19.105pcp-11025KHz/arch/arm/kernel/setup.c	2020-08-06 13:41:46.219787760 +0100
+@@ -1255,11 +1255,11 @@
+ #if defined(CONFIG_SMP)
+ 		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
+ 			   per_cpu(cpu_data, i).loops_per_jiffy / (500000UL/HZ),
+-			   (per_cpu(cpu_data, i).loops_per_jiffy / (5000UL/HZ)) % 100);
++			   (per_cpu(cpu_data, i).loops_per_jiffy * HZ / 5000UL) % 100);
+ #else
+ 		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
+ 			   loops_per_jiffy / (500000/HZ),
+-			   (loops_per_jiffy / (5000/HZ)) % 100);
++			   (loops_per_jiffy * HZ / 5000) % 100);
+ #endif
+ 		/* dump out the processor features */
+ 		seq_puts(m, "Features\t: ");
+--- linux/arch/arm/kernel/smp.c	2020-08-06 15:37:52.916179919 +0100
++++ linux-4.19.105pcp-11025KHz/arch/arm/kernel/smp.c	2020-08-06 13:43:52.416542637 +0100
+@@ -467,7 +467,7 @@
+ 	       "(%lu.%02lu BogoMIPS).\n",
+ 	       num_online_cpus(),
+ 	       bogosum / (500000/HZ),
+-	       (bogosum / (5000/HZ)) % 100);
++	       (bogosum * HZ / 5000) % 100);
+ 
+ 	hyp_mode_check();
+ }
+--- linux-4.20.1/init/calibrate.c	2019-01-09 17:46:05.000000000 +0100
++++ linux-4.20.1a/init/calibrate.c	2019-01-10 19:44:41.340976136 +0100
+@@ -307,7 +307,7 @@
+ 	if (!printed)
+ 		pr_cont("%lu.%02lu BogoMIPS (lpj=%lu)\n",
+ 			lpj/(500000/HZ),
+-			(lpj/(5000/HZ)) % 100, lpj);
++			(lpj*HZ/5000) % 100, lpj);
+ 
+ 	loops_per_jiffy = lpj;
+ 	printed = true;
+--- linux/include/uapi/linux/nfsd/stats.h	2020-08-06 15:40:38.552945550 +0100
++++ linux-4.19.105pcp-11025KHz/include/uapi/linux/nfsd/stats.h	2020-08-06 13:59:51.803891923 +0100
+@@ -13,6 +13,6 @@
+ #include <linux/nfs4.h>
+ 
+ /* thread usage wraps very million seconds (approx one fortnight) */
+-#define	NFSD_USAGE_WRAP	(HZ*1000000)
++#define	NFSD_USAGE_WRAP	(HZ*100000)
+ 
+ #endif /* _UAPILINUX_NFSD_STATS_H */
+--- linux/kernel/Kconfig.hz	2020-08-06 15:40:38.692942818 +0100
++++ linux-4.19.105pcp-11025KHz/kernel/Kconfig.hz	2020-08-06 14:07:04.384377910 +0100
+@@ -45,6 +45,19 @@
+ 	 1000 Hz is the preferred choice for desktop systems and other
+ 	 systems requiring fast interactive responses to events.
+ 
++	config HZ_8820
++		bool "8820 HZ"
++	help
++	 8820 Hz is an obscene value to use to run broken software
++	 that is Hz limited.
++	 Being over 1000, driver breakage is likely.
++
++	config HZ_11025
++		bool "11025 HZ"
++	help
++	 11025 Hz is an obscene value to use to run broken software
++	 that is Hz limited.
++	 Being over 1000, driver breakage is likely.
+ endchoice
+ 
+ config HZ
+@@ -53,6 +59,8 @@
+ 	default 250 if HZ_250
+ 	default 300 if HZ_300
+ 	default 1000 if HZ_1000
++	default 8820 if HZ_8820
++	default 11025 if HZ_11025
+ 
+ config SCHED_HRTICK
+ 	def_bool HIGH_RES_TIMERS
+--- linux/arch/arm/Kconfig	2020-08-06 15:37:36.346503665 +0100
++++ linux-4.19.105pcp-11025KHz/arch/arm/Kconfig	2020-08-06 16:53:04.508618436 +0100
+@@ -1511,6 +1511,13 @@
+ config HZ_1000
+ 	bool "1000 Hz"
+ 
++config HZ_8820
++	bool "8820 HZ"
++
++
++config HZ_11025
++	bool "11025 HZ"
++
+ endchoice
+ 
+ config HZ
+@@ -1521,7 +1524,9 @@
+ 	default 250 if HZ_250
+ 	default 300 if HZ_300
+ 	default 500 if HZ_500
+-	default 1000
++	default 1000 if HZ_1000
++	default 8820 if HZ_8820
++	default 11025 if HZ_1105
+ 
+ config SCHED_HRTICK
+ 	def_bool HIGH_RES_TIMERS
+--- linux/arch/arm64/kernel/cpuinfo.c	2020-08-08 01:25:29.172716182 +0000
++++ linux-4.19.122-pcpRT-11025KHz/arch/arm64/kernel/cpuinfo.c	2020-08-08 01:46:04.777047941 +0000
+@@ -148,7 +148,7 @@
+ 
+ 		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
+ 			   loops_per_jiffy / (500000UL/HZ),
+-			   loops_per_jiffy / (5000UL/HZ) % 100);
++			   loops_per_jiffy * HZ /5000UL % 100);
+ 
+ 		/*
+ 		 * Dump out the common processor features in a single line.
+--- linux/net/netfilter/nf_conntrack_proto_sctp.c	2020-08-08 01:27:26.039299182 +0000
++++ linux-4.19.122-pcpRT-11025KHz/net/netfilter/nf_conntrack_proto_sctp.c	2020-08-08 07:35:48.045726507 +0000
+@@ -57,7 +57,7 @@
+ 	[SCTP_CONNTRACK_CLOSED]			= 10 SECS,
+ 	[SCTP_CONNTRACK_COOKIE_WAIT]		= 3 SECS,
+ 	[SCTP_CONNTRACK_COOKIE_ECHOED]		= 3 SECS,
+-	[SCTP_CONNTRACK_ESTABLISHED]		= 5 DAYS,
++	[SCTP_CONNTRACK_ESTABLISHED]		= 4.5 DAYS,
+ 	[SCTP_CONNTRACK_SHUTDOWN_SENT]		= 300 SECS / 1000,
+ 	[SCTP_CONNTRACK_SHUTDOWN_RECD]		= 300 SECS / 1000,
+ 	[SCTP_CONNTRACK_SHUTDOWN_ACK_SENT]	= 3 SECS,
+--- linux/net/netfilter/nf_conntrack_proto_tcp.c	2020-08-08 01:27:26.039299182 +0000
++++ linux-4.19.122-pcpRT-11025KHz/net/netfilter/nf_conntrack_proto_tcp.c	2020-08-08 07:35:23.705988455 +0000
+@@ -72,7 +72,7 @@
+ static const unsigned int tcp_timeouts[TCP_CONNTRACK_TIMEOUT_MAX] = {
+ 	[TCP_CONNTRACK_SYN_SENT]	= 2 MINS,
+ 	[TCP_CONNTRACK_SYN_RECV]	= 60 SECS,
+-	[TCP_CONNTRACK_ESTABLISHED]	= 5 DAYS,
++	[TCP_CONNTRACK_ESTABLISHED]	= 4.5 DAYS,
+ 	[TCP_CONNTRACK_FIN_WAIT]	= 2 MINS,
+ 	[TCP_CONNTRACK_CLOSE_WAIT]	= 60 SECS,
+ 	[TCP_CONNTRACK_LAST_ACK]	= 30 SECS,
+--- linux/arch/arm64/configs/bcm2711_defconfig	2020-08-08 01:25:29.104716976 +0000
++++ linux-4.19.122-pcpRT-11025KHz/arch/arm64/configs/bcm2711_defconfig	2020-08-09 10:32:05.940943688 +0000
+@@ -8,6 +8,8 @@
+ # CONFIG_NO_HZ_IDLE is not set
+ CONFIG_NO_HZ_FULL=y
+ CONFIG_NO_HZ_FULL_ALL=y
++CONFIG_HZ_8820=y
++CONFIG_HZ=8820
+ # CONFIG_TICK_CPU_ACCOUNTING is not set
+ # CONFIG_RCU_EXPERT is not set
+ CONFIG_PREEMPT_RT_FULL=y
