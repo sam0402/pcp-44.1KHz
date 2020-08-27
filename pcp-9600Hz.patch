@@ -59,10 +59,10 @@
 +	 that is Hz limited.
 +	 Being over 1000, driver breakage is likely.
 +
-+	config HZ_11025
-+		bool "11025 HZ"
++	config HZ_9600
++		bool "9600 HZ"
 +	help
-+	 11025 Hz is an obscene value to use to run broken software
++	 9600 Hz is an obscene value to use to run broken software
 +	 that is Hz limited.
 +	 Being over 1000, driver breakage is likely.
  endchoice
@@ -73,7 +73,7 @@
  	default 300 if HZ_300
  	default 1000 if HZ_1000
 +	default 8820 if HZ_8820
-+	default 11025 if HZ_11025
++	default 9600 if HZ_9600
  
  config SCHED_HRTICK
  	def_bool HIGH_RES_TIMERS
@@ -87,13 +87,13 @@
 +	bool "8820 HZ"
 +
 +
-+config HZ_11025
-+	bool "11025 HZ"
++config HZ_9600
++	bool "9600 HZ"
 +
  endchoice
  
  config HZ
-@@ -1521,7 +1524,10 @@
+@@ -1521,7 +1524,9 @@
  	default 250 if HZ_250
  	default 300 if HZ_300
  	default 500 if HZ_500
@@ -101,7 +101,6 @@
 +	default 1000 if HZ_1000
 +	default 8820 if HZ_8820
 +	default 9600 if HZ_9600
-+	default 11025 if HZ_11025
  
  config SCHED_HRTICK
  	def_bool HIGH_RES_TIMERS
