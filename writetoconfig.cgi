@@ -101,12 +101,28 @@ case "$SUBMIT" in
 				rm -f $TCEMNT/tce/squeezelite
 				SAVE=1
 			;;
+			pcm)
+				if [ -f $TCEMNT/tce/squeezelite-pcm ]; then
+					rm -f $TCEMNT/tce/squeezelite; ln -s $TCEMNT/tce/squeezelite-pcm $TCEMNT/tce/squeezelite
+					SAVE=1
+				else
+					echo '<p class="error">[ ERROR ] Squeezelite PCM only not found. Copy PCM binary before setting this option.</p>'
+				fi
+			;;
+			dsd)
+				if [ -f $TCEMNT/tce/squeezelite-dsd ]; then
+					rm -f $TCEMNT/tce/squeezelite; ln -s $TCEMNT/tce/squeezelite-dsd $TCEMNT/tce/squeezelite
+					SAVE=1
+				else
+					echo '<p class="error">[ ERROR ] DSD Squeezelite not found. Copy DSD binary before setting this option.</p>'
+				fi
+			;;
 			custom)
 				if [ -f $TCEMNT/tce/squeezelite-custom ]; then
 					rm -f $TCEMNT/tce/squeezelite; ln -s $TCEMNT/tce/squeezelite-custom $TCEMNT/tce/squeezelite
 					SAVE=1
 				else
-					echo '<p class="error">[ ERROR ] Custom Squeezelite not found. Copy custom binary before setting this option.</p>'
+					echo '<p class="error">[ ERROR ] Custom Squeezelite not found. Copy Custom binary before setting this option.</p>'
 				fi
 			;;
 		esac
