@@ -1,0 +1,24 @@
++++ linux/drivers/pci/controller/pcie-brcmstb.c	2020-09-30 18:19:18.835369305 +0800
+@@ -943,10 +944,13 @@
+ 			/* Account for legacy interrupt offset */
+ 			hwirq = bit - msi->intr_legacy_offset;
+
++#ifdef CONFIG_IPIPE
++            ipipe_handle_demuxed_irq(irq_linear_revmap(msi->inner_domain, hwirq));
++#else
+ 			virq = irq_find_mapping(msi->inner_domain, hwirq);
+ 			if (virq) {
+ 				if (msi->used & (1 << hwirq))
+-					generic_handle_irq(virq);
++					ipipe_handle_demuxed_irq(virq); //patched for xenomai, prevent kernel panic when usb devices are connected @HoTam
+ 				else
+ 					dev_info(dev, "unhandled MSI %d\n",
+ 						 hwirq);
+@@ -954,6 +958,7 @@
+ 				/* Unknown MSI, just clear it */
+ 				dev_dbg(dev, "unexpected MSI\n");
+ 			}
++#endif
+ 		}
+ 	}
+ 	chained_irq_exit(chip, desc);
