@@ -1,10 +1,9 @@
 --- linux-4/drivers/pci/controller/pcie-brcmstb.c	2020-09-30 23:57:51.249563288 +0000
 +++ linux/drivers/pci/controller/pcie-brcmstb.c	2020-10-01 00:56:33.184991757 +0000
-@@ -942,11 +943,13 @@
-
+@@ -944,10 +944,13 @@
  			/* Account for legacy interrupt offset */
  			hwirq = bit - msi->intr_legacy_offset;
--
+
 +#ifdef CONFIG_IPIPE
 +            ipipe_handle_demuxed_irq(irq_linear_revmap(msi->inner_domain, hwirq));
 +#else
@@ -16,7 +15,7 @@
  				else
  					dev_info(dev, "unhandled MSI %d\n",
  						 hwirq);
-@@ -954,6 +957,7 @@
+@@ -955,6 +958,7 @@
  				/* Unknown MSI, just clear it */
  				dev_dbg(dev, "unexpected MSI\n");
  			}
