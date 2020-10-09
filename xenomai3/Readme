@@ -1,1 +1,2 @@
 Linux Kernel 4.19.122 Xenomai Patch
+CONFIG_HZ 11000Hz Patch
