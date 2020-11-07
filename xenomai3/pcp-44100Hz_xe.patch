@@ -40,23 +40,23 @@
 +++ b/arch/x86/kernel/cpu/proc.c    2020-11-07 16:12:39.885536873 +0800
 @@ -112,7 +112,7 @@
 
-        seq_printf(m, "\nbogomips\t: %lu.%02lu\n",
-                   c->loops_per_jiffy/(500000/HZ),
--                  (c->loops_per_jiffy/(5000/HZ)) % 100);
-+                  (c->loops_per_jiffy*HZ/5000) % 100);
+ 	seq_printf(m, "\nbogomips\t: %lu.%02lu\n",
+ 		   c->loops_per_jiffy/(500000/HZ),
+-		   (c->loops_per_jiffy/(5000/HZ)) % 100);
++		   (c->loops_per_jiffy*HZ/5000) % 100);
 
  #ifdef CONFIG_X86_64
-        if (c->x86_tlbsize > 0)
+ 	if (c->x86_tlbsize > 0)
 --- a/arch/x86/kernel/smpboot.c    2020-09-29 21:37:39.000000000 +0800
 +++ b/arch/x86/kernel/smpboot.c     2020-11-07 16:16:55.394527474 +0800
 @@ -603,7 +603,7 @@
-        pr_info("Total of %d processors activated (%lu.%02lu BogoMIPS)\n",
-                num_online_cpus(),
-                bogosum/(500000/HZ),
--               (bogosum/(5000/HZ))%100);
-+               (bogosum*HZ/5000) % 100);
+ 	pr_info("Total of %d processors activated (%lu.%02lu BogoMIPS)\n",
+ 		num_online_cpus(),
+ 		bogosum/(500000/HZ),
+-		(bogosum/(5000/HZ))%100);
++		(bogosum*HZ/5000) % 100);
 
-        pr_debug("Before bogocount - setting activated=1\n");
+ 	pr_debug("Before bogocount - setting activated=1\n");
  }
 --- linux/include/uapi/linux/nfsd/stats.h	2020-08-06 15:40:38.552945550 +0100
 +++ linux-4.19.105pcp-44100KHz/include/uapi/linux/nfsd/stats.h	2020-08-06 13:59:51.803891923 +0100
