@@ -1,4 +1,4 @@
---- linux/arch/arm/kernel/setup.c	2020-08-06 15:37:52.916179919 +0100
+--- lah/arm/kernel/setup.c	2020-08-06 15:37:52.916179919 +0100
 +++ linux-4.19.105pcp-44100KHz/arch/arm/kernel/setup.c	2020-08-06 13:41:46.219787760 +0100
 @@ -1255,11 +1255,11 @@
  #if defined(CONFIG_SMP)
@@ -36,6 +36,28 @@
  
  	loops_per_jiffy = lpj;
  	printed = true;
+--- a/arch/x86/kernel/cpu/proc.c   2020-09-29 21:37:39.000000000 +0800
++++ b/arch/x86/kernel/cpu/proc.c    2020-11-07 16:12:39.885536873 +0800
+@@ -112,7 +112,7 @@
+
+        seq_printf(m, "\nbogomips\t: %lu.%02lu\n",
+                   c->loops_per_jiffy/(500000/HZ),
+-                  (c->loops_per_jiffy/(5000/HZ)) % 100);
++                  (c->loops_per_jiffy*HZ/5000) % 100);
+
+ #ifdef CONFIG_X86_64
+        if (c->x86_tlbsize > 0)
+--- a/arch/x86/kernel/smpboot.c    2020-09-29 21:37:39.000000000 +0800
++++ b/arch/x86/kernel/smpboot.c     2020-11-07 16:16:55.394527474 +0800
+@@ -603,7 +603,7 @@
+        pr_info("Total of %d processors activated (%lu.%02lu BogoMIPS)\n",
+                num_online_cpus(),
+                bogosum/(500000/HZ),
+-               (bogosum/(5000/HZ))%100);
++               (bogosum*HZ/5000) % 100);
+
+        pr_debug("Before bogocount - setting activated=1\n");
+ }
 --- linux/include/uapi/linux/nfsd/stats.h	2020-08-06 15:40:38.552945550 +0100
 +++ linux-4.19.105pcp-44100KHz/include/uapi/linux/nfsd/stats.h	2020-08-06 13:59:51.803891923 +0100
 @@ -13,6 +13,6 @@
@@ -111,7 +133,7 @@
  		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
  			   loops_per_jiffy / (500000UL/HZ),
 -			   loops_per_jiffy / (5000UL/HZ) % 100);
-+			   loops_per_jiffy * HZ /5000UL % 100);
++			   loops_per_jiffy * HZ /5000UL % 100;
  
  		/*
  		 * Dump out the common processor features in a single line.
@@ -174,3 +196,15 @@
  CONFIG_HIGH_RES_TIMERS=y
  CONFIG_PREEMPT=y
  CONFIG_BSD_PROCESS_ACCT=y
+--- a/arch/x86/configs/x86_64_defconfig	2020-09-29 21:37:39.000000000 +0800
++++ b/arch/x86/configs/x86_64_defconfig	2020-11-07 14:56:07.418386916 +0800
+@@ -51,7 +51,8 @@
+ CONFIG_X86_CHECK_BIOS_CORRUPTION=y
+ # CONFIG_MTRR_SANITIZER is not set
+ CONFIG_EFI=y
+-CONFIG_HZ_1000=y
++CONFIG_HZ_44100=y
++CONFIG_HZ=44100
+ CONFIG_KEXEC=y
+ CONFIG_CRASH_DUMP=y
+ CONFIG_RANDOMIZE_BASE=y
