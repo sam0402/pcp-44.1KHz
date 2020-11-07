@@ -1,5 +1,5 @@
 --- lah/arm/kernel/setup.c	2020-08-06 15:37:52.916179919 +0100
-+++ linux-4.19.105pcp-44100KHz/arch/arm/kernel/setup.c	2020-08-06 13:41:46.219787760 +0100
++++ linux-4.19.105pcp-22048KHz/arch/arm/kernel/setup.c	2020-08-06 13:41:46.219787760 +0100
 @@ -1255,11 +1255,11 @@
  #if defined(CONFIG_SMP)
  		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
@@ -15,7 +15,7 @@
  		/* dump out the processor features */
  		seq_puts(m, "Features\t: ");
 --- linux/arch/arm/kernel/smp.c	2020-08-06 15:37:52.916179919 +0100
-+++ linux-4.19.105pcp-44100KHz/arch/arm/kernel/smp.c	2020-08-06 13:43:52.416542637 +0100
++++ linux-4.19.105pcp-22048KHz/arch/arm/kernel/smp.c	2020-08-06 13:43:52.416542637 +0100
 @@ -467,7 +467,7 @@
  	       "(%lu.%02lu BogoMIPS).\n",
  	       num_online_cpus(),
@@ -59,7 +59,7 @@
  	pr_debug("Before bogocount - setting activated=1\n");
  }
 --- linux/include/uapi/linux/nfsd/stats.h	2020-08-06 15:40:38.552945550 +0100
-+++ linux-4.19.105pcp-44100KHz/include/uapi/linux/nfsd/stats.h	2020-08-06 13:59:51.803891923 +0100
++++ linux-4.19.105pcp-22048KHz/include/uapi/linux/nfsd/stats.h	2020-08-06 13:59:51.803891923 +0100
 @@ -13,6 +13,6 @@
  #include <linux/nfs4.h>
  
@@ -68,35 +68,23 @@
 +#define	NFSD_USAGE_WRAP	(HZ*100000)
  
  #endif /* _UAPILINUX_NFSD_STATS_H */
-diff -Nur linux-4/fs/direct-io.c linux/fs/direct-io.c
---- linux-4/fs/direct-io.c	2020-09-29 21:37:43.000000000 +0800
-+++ linux/fs/direct-io.c	2020-11-08 00:05:33.059965936 +0800
-@@ -224,7 +224,7 @@
-  */
- void dio_warn_stale_pagecache(struct file *filp)
- {
--	static DEFINE_RATELIMIT_STATE(_rs, 86400 * HZ, DEFAULT_RATELIMIT_BURST);
-+	static DEFINE_RATELIMIT_STATE(_rs, 86400UL * HZ, DEFAULT_RATELIMIT_BURST);
- 	char pathname[128];
- 	struct inode *inode = file_inode(filp);
- 	char *path;
 --- linux/kernel/Kconfig.hz	2020-08-06 15:40:38.692942818 +0100
-+++ linux-4.19.105pcp-44100KHz/kernel/Kconfig.hz	2020-08-06 14:07:04.384377910 +0100
++++ linux-4.19.105pcp-22048KHz/kernel/Kconfig.hz	2020-08-06 14:07:04.384377910 +0100
 @@ -45,6 +45,19 @@
  	 1000 Hz is the preferred choice for desktop systems and other
  	 systems requiring fast interactive responses to events.
  
-+	config HZ_44100
-+		bool "44100 HZ"
++	config HZ_22048
++		bool "22048 HZ"
 +	help
-+	 44100 Hz is an obscene value to use to run broken software
++	 22048 Hz is an obscene value to use to run broken software
 +	 that is Hz limited.
 +	 Being over 1000, driver breakage is likely.
 +
-+	config HZ_48000
-+		bool "48000 HZ"
++	config HZ_24000
++		bool "24000 HZ"
 +	help
-+	 48000 Hz is an obscene value to use to run broken software
++	 24000 Hz is an obscene value to use to run broken software
 +	 that is Hz limited.
 +	 Being over 1000, driver breakage is likely.
  endchoice
@@ -106,23 +94,23 @@ diff -Nur linux-4/fs/direct-io.c linux/fs/direct-io.c
  	default 250 if HZ_250
  	default 300 if HZ_300
  	default 1000 if HZ_1000
-+	default 44100 if HZ_44100
-+	default 48000 if HZ_48000
++	default 22048 if HZ_22048
++	default 24000 if HZ_24000
  
  config SCHED_HRTICK
  	def_bool HIGH_RES_TIMERS
 --- linux/arch/arm/Kconfig	2020-08-06 15:37:36.346503665 +0100
-+++ linux-4.19.105pcp-44100KHz/arch/arm/Kconfig	2020-08-06 16:53:04.508618436 +0100
++++ linux-4.19.105pcp-22048KHz/arch/arm/Kconfig	2020-08-06 16:53:04.508618436 +0100
 @@ -1511,6 +1511,13 @@
  config HZ_1000
  	bool "1000 Hz"
  
-+config HZ_44100
-+	bool "44100 HZ"
++config HZ_22048
++	bool "22048 HZ"
 +
 +
-+config HZ_48000
-+	bool "48000 HZ"
++config HZ_24000
++	bool "24000 HZ"
 +
  endchoice
  
@@ -133,8 +121,8 @@ diff -Nur linux-4/fs/direct-io.c linux/fs/direct-io.c
  	default 500 if HZ_500
 -	default 1000
 +	default 1000 if HZ_1000
-+	default 44100 if HZ_44100
-+	default 48000 if HZ_48000
++	default 22048 if HZ_22048
++	default 24000 if HZ_24000
  
  config SCHED_HRTICK
  	def_bool HIGH_RES_TIMERS
@@ -203,8 +191,8 @@ diff -Nur linux-4/fs/direct-io.c linux/fs/direct-io.c
  CONFIG_POSIX_MQUEUE=y
  CONFIG_GENERIC_IRQ_DEBUGFS=y
  CONFIG_NO_HZ=y
-+CONFIG_HZ_44100=y
-+CONFIG_HZ=44100
++CONFIG_HZ_22048=y
++CONFIG_HZ=22048
  CONFIG_HIGH_RES_TIMERS=y
  CONFIG_PREEMPT=y
  CONFIG_BSD_PROCESS_ACCT=y
@@ -215,7 +203,7 @@ diff -Nur linux-4/fs/direct-io.c linux/fs/direct-io.c
  # CONFIG_MTRR_SANITIZER is not set
  CONFIG_EFI=y
 -CONFIG_HZ_1000=y
-+CONFIG_HZ_44100=y
++CONFIG_HZ_22048=y
  CONFIG_KEXEC=y
  CONFIG_CRASH_DUMP=y
  CONFIG_RANDOMIZE_BASE=y
