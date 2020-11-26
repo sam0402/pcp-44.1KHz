@@ -146,12 +146,16 @@ case "$SUBMIT" in
 		case $HIGHHZ in
 			on)
 				pcp_mount_bootpart_nohtml
-				sed -i 's/v8_88/v8_96/' $CONFIGTXT
+				sed -i 's/v8_44k/v8_48k/' $CONFIGTXT
+				sed -i 's/1764/1920/' $CONFIGTXT
+				sed -i 's/voltage=3/voltage=4/' $CONFIGTXT
 				pcp_umount_bootpart_nohtml
 			;;
 			off)
 				pcp_mount_bootpart_nohtml
-				sed -i 's/v8_96/v8_88/' $CONFIGTXT
+				sed -i 's/v8_48k/v8_44k/' $CONFIGTXT
+				sed -i 's/1920/1764/' $CONFIGTXT
+				sed -i 's/voltage=4/voltage=3/' $CONFIGTXT
 				pcp_umount_bootpart_nohtml
 			;;
 		esac
