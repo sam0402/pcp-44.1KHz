@@ -15,6 +15,3 @@ wget https://raw.githubusercontent.com/sam0402/pcp-44.1KHz/master/cdrom-5.13.1-p
 tce-load -i pcp-cdda2wav.tcz
 cd /mnt/$TARGET/slimserver/prefs/plugin/
 wget -O - https://raw.githubusercontent.com/bpa-code/bpaplugins/master/CDplayer-linux-v111.ZIP | unzip -
-echo "Rebooting..."
-sleep 3
-pcp br
