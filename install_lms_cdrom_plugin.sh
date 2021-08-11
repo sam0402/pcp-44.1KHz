@@ -14,4 +14,5 @@ wget https://raw.githubusercontent.com/sam0402/pcp-44.1KHz/master/cdrom-5.13.1-p
 wget https://raw.githubusercontent.com/sam0402/pcp-44.1KHz/master/cdrom-5.13.1-pcpEVL_48k.tcz.md5.txt
 tce-load -w -i pcp-cdda2wav.tcz
 cd /mnt/$TARGET/slimserver/prefs/plugin/
+echo Install LMS CDplayer plugin
 wget -O - https://raw.githubusercontent.com/bpa-code/bpaplugins/master/CDplayer-linux-v111.ZIP | unzip -
