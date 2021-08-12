@@ -16,3 +16,6 @@ tce-load -w -i pcp-cdda2wav.tcz
 cd /mnt/$TARGET/slimserver/prefs/plugin/
 echo Install LMS CDplayer plugin
 wget -O - https://raw.githubusercontent.com/bpa-code/bpaplugins/master/CDplayer-linux-v111.ZIP | unzip -
+echo "Rebooting..."
+sleep 3
+pcp br
