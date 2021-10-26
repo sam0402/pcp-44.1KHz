@@ -1,0 +1,267 @@
+--- lah/arm/kernel/setup.c	2020-08-06 15:37:52.916179919 +0100
++++ linux-4.19.105pcp-44100KHz/arch/arm/kernel/setup.c	2020-08-06 13:41:46.219787760 +0100
+@@ -1255,11 +1255,11 @@
+ #if defined(CONFIG_SMP)
+ 		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
+ 			   per_cpu(cpu_data, i).loops_per_jiffy / (500000UL/HZ),
+-			   (per_cpu(cpu_data, i).loops_per_jiffy / (5000UL/HZ)) % 100);
++			   (per_cpu(cpu_data, i).loops_per_jiffy * HZ / 5000UL) % 100);
+ #else
+ 		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
+ 			   loops_per_jiffy / (500000/HZ),
+-			   (loops_per_jiffy / (5000/HZ)) % 100);
++			   (loops_per_jiffy * HZ / 5000) % 100);
+ #endif
+ 		/* dump out the processor features */
+ 		seq_puts(m, "Features\t: ");
+--- linux/arch/arm/kernel/smp.c	2020-08-06 15:37:52.916179919 +0100
++++ linux-4.19.105pcp-44100KHz/arch/arm/kernel/smp.c	2020-08-06 13:43:52.416542637 +0100
+@@ -467,7 +467,7 @@
+ 	       "(%lu.%02lu BogoMIPS).\n",
+ 	       num_online_cpus(),
+ 	       bogosum / (500000/HZ),
+-	       (bogosum / (5000/HZ)) % 100);
++	       (bogosum * HZ / 5000) % 100);
+ 
+ 	hyp_mode_check();
+ }
+--- linux-4.20.1/init/calibrate.c	2019-01-09 17:46:05.000000000 +0100
++++ linux-4.20.1a/init/calibrate.c	2019-01-10 19:44:41.340976136 +0100
+@@ -307,7 +307,7 @@
+ 	if (!printed)
+ 		pr_cont("%lu.%02lu BogoMIPS (lpj=%lu)\n",
+ 			lpj/(500000/HZ),
+-			(lpj/(5000/HZ)) % 100, lpj);
++			(lpj*HZ/5000) % 100, lpj);
+ 
+ 	loops_per_jiffy = lpj;
+ 	printed = true;
+--- a/arch/x86/kernel/cpu/proc.c   2020-09-29 21:37:39.000000000 +0800
++++ b/arch/x86/kernel/cpu/proc.c    2020-11-07 16:12:39.885536873 +0800
+@@ -112,7 +112,7 @@
+
+ 	seq_printf(m, "\nbogomips\t: %lu.%02lu\n",
+ 		   c->loops_per_jiffy/(500000/HZ),
+-		   (c->loops_per_jiffy/(5000/HZ)) % 100);
++		   (c->loops_per_jiffy*HZ/5000) % 100);
+
+ #ifdef CONFIG_X86_64
+ 	if (c->x86_tlbsize > 0)
+--- a/arch/x86/kernel/smpboot.c    2020-09-29 21:37:39.000000000 +0800
++++ b/arch/x86/kernel/smpboot.c     2020-11-07 16:16:55.394527474 +0800
+@@ -603,7 +603,7 @@
+ 	pr_info("Total of %d processors activated (%lu.%02lu BogoMIPS)\n",
+ 		num_online_cpus(),
+ 		bogosum/(500000/HZ),
+-		(bogosum/(5000/HZ))%100);
++		(bogosum*HZ/5000) % 100);
+
+ 	pr_debug("Before bogocount - setting activated=1\n");
+ }
+--- linux/include/uapi/linux/nfsd/stats.h	2020-08-06 15:40:38.552945550 +0100
++++ linux-4.19.105pcp-44100KHz/include/uapi/linux/nfsd/stats.h	2020-08-06 13:59:51.803891923 +0100
+@@ -13,6 +13,6 @@
+ #include <linux/nfs4.h>
+ 
+ /* thread usage wraps very million seconds (approx one fortnight) */
+-#define	NFSD_USAGE_WRAP	(HZ*1000000)
++#define	NFSD_USAGE_WRAP	(HZ*100000)
+ 
+ #endif /* _UAPILINUX_NFSD_STATS_H */
+--- linux/kernel/Kconfig.hz	2020-08-06 15:40:38.692942818 +0100
++++ linux-4.19.105pcp-44100KHz/kernel/Kconfig.hz	2020-08-06 14:07:04.384377910 +0100
+@@ -45,6 +45,19 @@
+ 	 1000 Hz is the preferred choice for desktop systems and other
+ 	 systems requiring fast interactive responses to events.
+ 
++	config HZ_44100
++		bool "44100 HZ"
++	help
++	 44100 Hz is an obscene value to use to run broken software
++	 that is Hz limited.
++	 Being over 1000, driver breakage is likely.
++
++	config HZ_48000
++		bool "48000 HZ"
++	help
++	 48000 Hz is an obscene value to use to run broken software
++	 that is Hz limited.
++	 Being over 1000, driver breakage is likely.
+ endchoice
+ 
+ config HZ
+@@ -53,6 +59,8 @@
+ 	default 250 if HZ_250
+ 	default 300 if HZ_300
+ 	default 1000 if HZ_1000
++	default 44100 if HZ_44100
++	default 48000 if HZ_48000
+ 
+ config SCHED_HRTICK
+ 	def_bool HIGH_RES_TIMERS
+--- linux/arch/arm/Kconfig	2020-08-06 15:37:36.346503665 +0100
++++ linux-4.19.105pcp-44100KHz/arch/arm/Kconfig	2020-08-06 16:53:04.508618436 +0100
+@@ -1511,6 +1511,13 @@
+ config HZ_1000
+ 	bool "1000 Hz"
+ 
++config HZ_44100
++	bool "44100 HZ"
++
++
++config HZ_48000
++	bool "48000 HZ"
++
+ endchoice
+ 
+ config HZ
+@@ -1521,7 +1524,9 @@
+ 	default 250 if HZ_250
+ 	default 300 if HZ_300
+ 	default 500 if HZ_500
+-	default 1000
++	default 1000 if HZ_1000
++	default 44100 if HZ_44100
++	default 48000 if HZ_48000
+ 
+ config SCHED_HRTICK
+ 	def_bool HIGH_RES_TIMERS
+--- a/arch/arm64/kernel/cpuinfo.c	2020-08-08 01:25:29.172716182 +0000
++++ b/arch/arm64/kernel/cpuinfo.c	2020-08-08 01:46:04.777047941 +0000
+@@ -148,7 +148,7 @@
+ 
+ 		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
+ 			   loops_per_jiffy / (500000UL/HZ),
+-			   loops_per_jiffy / (5000UL/HZ) % 100);
++			   loops_per_jiffy * HZ /5000UL % 100);
+ 
+ 		/*
+ 		 * Dump out the common processor features in a single line.
+--- linux-4/net/netfilter/nf_conntrack_proto_tcp.c	2020-09-29 21:37:44.000000000 +0800
++++ linux/net/netfilter/nf_conntrack_proto_tcp.c	2020-10-06 09:14:01.701981426 +0800
+@@ -64,12 +64,12 @@
+ 	"SYN_SENT2",
+ };
+ 
+-#define SECS * HZ
++#define SECS * 1UL * HZ
+ #define MINS * 60 SECS
+ #define HOURS * 60 MINS
+ #define DAYS * 24 HOURS
+ 
+-static const unsigned int tcp_timeouts[TCP_CONNTRACK_TIMEOUT_MAX] = {
++static const unsigned long int tcp_timeouts[TCP_CONNTRACK_TIMEOUT_MAX] = {
+ 	[TCP_CONNTRACK_SYN_SENT]	= 2 MINS,
+ 	[TCP_CONNTRACK_SYN_RECV]	= 60 SECS,
+ 	[TCP_CONNTRACK_ESTABLISHED]	= 5 DAYS,
+--- linux-4/net/netfilter/nf_conntrack_proto_sctp.c	2020-09-29 21:37:44.000000000 +0800
++++ linux/net/netfilter/nf_conntrack_proto_sctp.c	2020-10-06 09:14:30.438872761 +0800
+@@ -48,12 +48,12 @@
+ 	"HEARTBEAT_ACKED",
+ };
+ 
+-#define SECS  * HZ
++#define SECS  * 1UL * HZ
+ #define MINS  * 60 SECS
+ #define HOURS * 60 MINS
+ #define DAYS  * 24 HOURS
+ 
+-static const unsigned int sctp_timeouts[SCTP_CONNTRACK_MAX] = {
++static const unsigned long int sctp_timeouts[SCTP_CONNTRACK_MAX] = {
+ 	[SCTP_CONNTRACK_CLOSED]			= 10 SECS,
+ 	[SCTP_CONNTRACK_COOKIE_WAIT]		= 3 SECS,
+ 	[SCTP_CONNTRACK_COOKIE_ECHOED]		= 3 SECS,
+
+--- a/include/linux/jiffies.h	2020-09-29 13:37:43.000000000 +0000
++++ b/include/linux/jiffies.h	2020-10-05 03:24:07.095041338 +0000
+@@ -38,6 +38,10 @@
+ # define SHIFT_HZ	12
+ #elif HZ >= 6144 && HZ < 12288
+ # define SHIFT_HZ	13
++#elif HZ >= 12288 && HZ < 24576
++# define SHIFT_HZ       14
++#elif HZ >= 24576 && HZ < 49152
++# define SHIFT_HZ       15
+ #else
+ # error Invalid value of HZ.
+ #endif
+--- a/arch/arm64/configs/bcm2711_defconfig	2020-09-29 21:37:38.645024592 +0800
++++ b/arch/arm64/configs/bcm2711_defconfig	2020-09-30 14:19:26.860969930 +0800
+@@ -4,6 +4,8 @@
+ CONFIG_POSIX_MQUEUE=y
+ CONFIG_GENERIC_IRQ_DEBUGFS=y
+ CONFIG_NO_HZ=y
++CONFIG_HZ_44100=y
++CONFIG_HZ=44100
+ CONFIG_HIGH_RES_TIMERS=y
+ CONFIG_PREEMPT=y
+ CONFIG_BSD_PROCESS_ACCT=y
+--- a/arch/x86/configs/x86_64_defconfig	2020-09-29 21:37:39.000000000 +0800
++++ b/arch/x86/configs/x86_64_defconfig	2020-11-07 14:56:07.418386916 +0800
+@@ -51,7 +51,7 @@
+ CONFIG_X86_CHECK_BIOS_CORRUPTION=y
+ # CONFIG_MTRR_SANITIZER is not set
+ CONFIG_EFI=y
+-CONFIG_HZ_1000=y
++CONFIG_HZ_44100=y
+ CONFIG_KEXEC=y
+ CONFIG_CRASH_DUMP=y
+ CONFIG_RANDOMIZE_BASE=y
+--- linux/arch/arm64/kernel/cpuinfo.c.orig	2021-05-30 00:58:46.000000000 +0800
++++ linux/arch/arm64/kernel/cpuinfo.c	2021-06-08 13:01:59.498568238 +0800
+@@ -17,6 +17,7 @@
+ #include <linux/elf.h>
+ #include <linux/init.h>
+ #include <linux/kernel.h>
++#include <linux/of_platform.h>
+ #include <linux/personality.h>
+ #include <linux/preempt.h>
+ #include <linux/printk.h>
+@@ -137,6 +138,10 @@
+ {
+ 	int i, j;
+ 	bool compat = personality(current->personality) == PER_LINUX32;
++	struct device_node *np;
++	const char *model;
++	const char *serial;
++	u32 revision;
+ 
+ 	for_each_online_cpu(i) {
+ 		struct cpuinfo_arm64 *cpuinfo = &per_cpu(cpu_data, i);
+@@ -154,8 +159,7 @@
+ 
+ 		seq_printf(m, "BogoMIPS\t: %lu.%02lu\n",
+ 			   loops_per_jiffy / (500000UL/HZ),
+-			   loops_per_jiffy / (5000UL/HZ) % 100);
+-
++			   loops_per_jiffy * HZ /5000UL % 100);
+ 		/*
+ 		 * Dump out the common processor features in a single line.
+ 		 * Userspace should read the hwcaps with getauxval(AT_HWCAP)
+@@ -197,6 +201,26 @@
+ 		seq_printf(m, "CPU revision\t: %d\n\n", MIDR_REVISION(midr));
+ 	}
+ 
++	seq_printf(m, "Hardware\t: BCM2835\n");
++
++	np = of_find_node_by_path("/system");
++	if (np) {
++		if (!of_property_read_u32(np, "linux,revision", &revision))
++			seq_printf(m, "Revision\t: %04x\n", revision);
++		of_node_put(np);
++	}
++
++	np = of_find_node_by_path("/");
++	if (np) {
++		if (!of_property_read_string(np, "serial-number",
++					     &serial))
++			seq_printf(m, "Serial\t\t: %s\n", serial);
++		if (!of_property_read_string(np, "model",
++					     &model))
++			seq_printf(m, "Model\t\t: %s\n", model);
++		of_node_put(np);
++	}
++
+ 	return 0;
+ }
+ 
