@@ -1,6 +1,4 @@
-# pcp-44.1KHz
-
-piCorePlayer 8 with 264KHz / 172KHz realtime(EVL) Kernel
+# piCorePlayer 8 with 264KHz / 172KHz realtime(EVL) Kernel
 
 ---
 
