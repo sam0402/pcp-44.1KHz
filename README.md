@@ -1,4 +1,4 @@
-# pcp-44.1KHz [![Donate](images/pdonate.png)](https://paypal.me/sam402shu)
+# pcp-44.1KHz [![Donate](setting/pdonate.png)](https://paypal.me/sam402shu)
 
 piCorePlayer 8 with 264KHz / 172KHz realtime(EVL) kernel
 
