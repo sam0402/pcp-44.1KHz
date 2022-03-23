@@ -2,7 +2,9 @@
 
 piCorePlayer 8 with 264KHz / 176KHz realtime(EVL) kernel
 
-pCP8-Q264.img includes PCM & DSD kernels for Player. If you have dsd files to play, choose DSD kernel. Overclock choose 2168.
+pCP8-Q264.img includes PCM & DSD kernels for Player. If you have dsd files to play, choose DSD kernel.
+
+Overclock choose 2168.
 
 pCP8-Q176+44.img includes 176.4KHz & 44.1KHz kernels, and supports USB Ethernet (Realtek RTL8152/8153, ASIX AX88179/178A).
 
