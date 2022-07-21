@@ -6,7 +6,7 @@ pCP8-Q264(ax).img includes PCM & DSD kernels for Player. If you have dsd files t
 
 pCP8-Q176+44.img includes 176.4KHz & 44.1KHz kernels, and supports USB Ethernet (Realtek RTL8152/8153, ASIX AX88179/178A).
 
-Select the Q176 if Q264/2168 can not work, overclock select the 1960.
+Select the Q176 if Q264/2168 can not work, overclock item change to 1960.
  
   44.1KHz is the best kernel for LMS, and supports CM4 IO-board. Overclock select 1600.
 
