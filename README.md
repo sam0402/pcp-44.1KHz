@@ -14,4 +14,4 @@ pCP8-Q44_WiFi.img is with 44.1KHz Kernel which supports WiFi and USB Ethernet.
 
 ---
 
-[ArchQ Linux for Audiophile](https://github.com/sam0402/ArchQ) 441/352/264 KHz realtime kernel for PC
+[ArchQ Linux for Audiophile](https://github.com/sam0402/ArchQ) 441/396/352/264 KHz realtime kernel for PC
